@@ -18,6 +18,11 @@ Computerphile是视频网站YouTube上的一个介绍计算机科学的频道 (c
 - 王川石: 数据收集、数据清洗、编写ElasticSearch查询
 
 ## 2. Data Collection
+### 2.1 Tools Introduction
+我们利用网络爬虫框架 (网络刮削工具? Web scraping tool) Scrapy从互联网上获取项目所需的数据。因为我们要爬取的网站YouTube使用JavaScript动态渲染页面，所以在网站返回的HTML中并不包含网页中所呈现的大多数信息。为了解决动态页面内容获取的问题，我们利用了Selenium。  
+Selenium是一个自动化测试工具，可以通过它用Python代码驱动浏览器执行点击、下拉等动作，以触发网页中的一些回调将需要的内容渲染出来；在渲染完成后，Python程序还可以通过Selenium获取加载完成的HTML，这样就解决了从动态网页中获取内容的问题。借助Selenium完成动态页面的加载，Scrapy就能像处理静态页面一样处理动态网页中的内容。  
+
+### 2.2 Codes and Explanation
 
 ## 3. Baseline IR System
 
