@@ -23,6 +23,152 @@ Computerphile是视频网站YouTube上的一个介绍计算机科学的频道 (c
 Selenium是一个自动化测试工具，可以通过它用Python代码驱动浏览器执行点击、下拉等动作，以触发网页中的一些回调将需要的内容渲染出来；在渲染完成后，Python程序还可以通过Selenium获取加载完成的HTML，这样就解决了从动态网页中获取内容的问题。借助Selenium完成动态页面的加载，Scrapy就能像处理静态页面一样处理动态网页中的内容。  
 
 ### 2.2 Codes and Explanation
+为了创建一个Scrapy项目，首先需要运行如下命令：
+```shell
+scrapy startproject computerphile
+```
+为了使项目能够运行，需要在spider目录下创建文件computerphile.py，其中定义了该爬取任务所需要的spider，`ComputerphileSpider`，为`scrapy.Spider`的子类。computerphile.py中内容如下：
+```python
+import re
+import time
+import scrapy
+from selenium import webdriver
+from scrapy.http import HtmlResponse
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
+
+class ComputerphileSpider(scrapy.Spider):
+    name = "computerphile"
+
+    def start_requests(self):
+        # 创建浏览器对象
+        option = webdriver.ChromeOptions()
+        chrome_prefs = dict()
+        option.experimental_options["prefs"] = chrome_prefs
+        chrome_prefs["profile.default_content_settings"] = {"images": 2}
+        chrome_prefs["profile.managed_default_content_settings"] = {"images": 2}
+        browser = webdriver.Chrome(options=option)
+
+        # 访问主页并下拉加载所有所需元素
+        main_page_url = "https://www.youtube.com/user/Computerphile/videos"
+        browser.get(main_page_url)
+        while True:
+            time.sleep(1)
+            browser.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
+            page = HtmlResponse(url=main_page_url, body=browser.page_source.encode())
+            load_ring = page.css("#contents > ytd-continuation-item-renderer")
+            if len(load_ring) == 0:
+                break
+
+        # 获取主页上视频URL并逐一爬取
+        main_page_response = HtmlResponse(url=main_page_url, body=browser.page_source.encode())
+        videos = main_page_response.css("#video-title-link::attr(href)")
+        yield from main_page_response.follow_all(videos)
+        browser.close()
+
+    def parse(self, response, **kwargs):
+        # 获取视频标题
+        title = response.css("#title > h1 > yt-formatted-string::text").get()
+
+        # 获取播放量和发布时间
+        tooltip = response.css("#tooltip::text").getall()
+        views_and_date = [x for x in tooltip if '次观看' in x][0]
+        views_date_pair = views_and_date.split('•')
+        # 获取播放量
+        views = int("".join(re.findall("[0-9]+", views_date_pair[0])))
+        # 获取发布时间
+        upload_date = "-".join(map(lambda x: x if len(x) >= 2 else '0' + x, re.findall("[0-9]+", views_date_pair[1])))
+
+        # 获取点赞数
+        likes_str = response.css(
+            "#segmented-like-button > "
+            "ytd-toggle-button-renderer > "
+            "yt-button-shape > button > "
+            "div.cbox.yt-spec-button-shape-next--button-text-content > "
+            "span::text").get()
+        try:
+            likes = int(likes_str)
+        except ValueError:
+            likes = int(float(likes_str[:-1]) * 10000)
+
+        # 获取评论数
+        comments = int(''.join(response.css("#count > yt-formatted-string > span:nth-child(1)::text").get().split(',')))
+
+        # 获取视频简介
+        intro_raw = response.css("#description-inline-expander > yt-formatted-string *::text").getall()
+        intro_reduced = map(lambda x: x.replace('\n', '').replace('\r', ''), intro_raw)
+        intro_list = [x for x in intro_reduced if len(x)]
+        introduction = '\n'.join(intro_list)
+
+        # 一条完整记录
+        result = {
+            "title": title,
+            "upload_date": upload_date,
+            "views": views,
+            "likes": likes,
+            "comments": comments,
+            "introduction": introduction
+        }
+        return result
+```
+`ComputerphileSpider`有两个类方法：`start_requests`和`parse`。其中`start_requests`为生成器函数，在访问Computerphile的YouTube主页后，利用Selenium控制浏览器不断下拉页面以将全部视频加载出来，然后从完成加载的页面中获取所有Computerphile投稿视频的URL提供给Scheduler进行后续的下载和处理。`parse`用于处理来自Downloader Middlewares的response，它将response中的内容解析为字典形式并返回，并将由Item Pipeline生成我们最终收集的数据。  
+如前文所述，因为动态渲染的存在，传递给`parse`的response中包含的内容是借助Selenium完成加载的，在Scrapy中，这可以通过编写一个包含了调用Selenium进行加载的逻辑的Downloader Middleware实现，这意味着需要在文件middlewares.py中添加以下代码以创建`ComputerphileMiddleware`类：
+```python
+import time
+from selenium import webdriver
+from scrapy.http import HtmlResponse
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+
+class ComputerphileMiddleware:
+    def __init__(self):
+        option = webdriver.ChromeOptions()
+        chrome_prefs = dict()
+        option.experimental_options["prefs"] = chrome_prefs
+        chrome_prefs["profile.default_content_settings"] = {"images": 2}
+        chrome_prefs["profile.managed_default_content_settings"] = {"images": 2}
+        self.browser = webdriver.Chrome(options=option)
+
+    def __del__(self):
+        self.browser.close()
+
+    def process_request(self, request, spider):
+        # 访问视频详情页
+        url = request.url
+        self.browser.get(url)
+
+        time.sleep(1)
+
+        # 展开加载视频简介
+        show_intro = self.browser.find_element("css selector", "#expand")
+        show_intro.click()
+
+        # 下拉加载评论
+        self.browser.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
+        wait = WebDriverWait(self.browser, 120)
+        wait.until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "#count > yt-formatted-string > span:nth-child(1)")))
+
+        # 返回页面内容
+        response_body = self.browser.page_source.encode()
+        response = HtmlResponse(url=url, body=response_body)
+        return response
+```
+Downloader Middleware接收来自Scheduler的request，并将得到的对应的response交给Spider的`parse`方法处理，可见其核心逻辑正是`process_request`方法，该方法利用Selenium调用浏览器对request中包含的URL进行访问，控制浏览器渲染需要的内容，并取得渲染完成的页面HTML，渲染结果包装成`HtmlResponse`对象并返回。  
+为了使`ComputerphileMiddleware`生效，在settings.py中需要有如下内容：
+```python
+DOWNLOADER_MIDDLEWARES = {
+   'computerphile.middlewares.ComputerphileMiddleware': 543,
+}
+```
+运行如下命令，即可进行对Computerphile的视频信息的爬取，爬取结果将保存于文件computerphile.csv中：
+```shell
+scrapy crawl computerphile -O computerphile.csv
+```
 
 ## 3. Baseline IR System
 
