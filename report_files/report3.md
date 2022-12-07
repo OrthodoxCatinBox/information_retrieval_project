@@ -17,7 +17,7 @@ The final appearance of the web page presented to the user is controlled by the 
 
 ### 1.3 Division of Work
 
-- 余正阳: 前端编程，Flask后端编程，评估系统性能
+- Zhengyang Yu: Front-end programming, Flask back-end programming, evaluating system performance, calculating MAP
 - Jishen Hu: Recorded data, Flask back-end programming, video recording, algorithm optimization
 - Chuanshi Wang: data collection, data cleaning, writing ElasticSearch queries
 
@@ -260,11 +260,10 @@ def search():
 
 ### 3.3 Build the front end with HTML and CSS
 
-前端由HTML和CSS编写而成，文件夹结构（包括Flask后端）如下：
-
+The front-end is written in HTML and CSS, and the folder structure (including the Flask back-end) is as follows.
 ```
 project
-│   server.py
+│   search.py
 └───static
 │   │   listview.css
 │   │   style.css
@@ -274,22 +273,22 @@ project
      |   search.html
 ```
 
-运行流程如下，首先我们需要启动server.py（在3.2中已经说明了），然后程序会自动调用search.html，
+The running process is as follows. First we need to start search.py (as explained in 3.2), and then the program will automatically call search.html.
 
 ```html
-<!-此代码为search.html->
 <head>
     <link rel="stylesheet" type="text/css" href="../static/style.css">
 </head>
+
 <div class="container">
     <form action="/result" method="get" class="parent"> 
-        <input type="text" id="keywords" name="keywords" placeholder="搜点东西">
-        <input type="submit" type="button" value="逆天一下">
+        <input type="text" id="keywords" name="keywords" placeholder="Search something">
+        <input type="submit" type="button" value="Just LZU It">
     </form>
 </div>
 ```
 
-search.html会导入style.css
+search.html will use style.css
 
 ```css
 /*此代码为style.css*/
@@ -322,7 +321,6 @@ body {
 }
 
 .parent>input:first-of-type {
-    /*输入框高度设置为40px, border占据2px，总高度为42px*/
     width: 38%;
     height: 100%;
     border: 1px solid #ccc;
@@ -339,7 +337,6 @@ body {
 }
 
 .parent>input:last-of-type {
-    /*button按钮border并不占据外围大小，设置高度42px*/
     width: 10%;
     height: 100%;
     position: absolute;
@@ -354,17 +351,17 @@ body {
 }
 ```
 
-![image-20221129030231552](C:\Users\YZY\AppData\Roaming\Typora\typora-user-images\image-20221129030231552.png)
+![image-20221207211218382](image/homepage)
 
-当用户输入内容，并点击搜索时，search.py会自动运行result.html。在这个html文件中，我们嵌入了可以被Flask识别的python循环代码，这样后端返回多少个结果，前端就会出现多少个搜索项
+When the user enters content and clicks search, search.py will automatically run result.html. In this html file, we embed python loop code that can be recognized by Flask, so that as many results as the backend returns, as many search items will appear on the frontend
 
 ```html
-<!该文件是result.html>
+<!This file is result.html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-  
+    
     <link rel="stylesheet" href="../static/listView.css">
 </head>
 <body>
@@ -405,10 +402,10 @@ body {
 </html>
 ```
 
-reuslt.html还会调用listview.css
+reuslt.html will also use listview.css
 
 ```css
-/*该文件是listview.css*/
+/*This file is listview.css*/
 body {
     background: whitesmoke;
 }
@@ -469,7 +466,6 @@ body {
     top: 20%;
 }
 
-/*中间的过度的横线*/
 .link-top {
     position: absolute;
     top: 60%;
@@ -486,7 +482,6 @@ body {
     width: 100%;
 }
 
-/*---------------------------subInfoDiv--------------*/
 .mainDIvMainInfoDivSubInfoDiv {
     position: relative;
     width: 100%;
@@ -562,8 +557,9 @@ body {
 }
 ```
 
-用户最终会看到结果
-![image-20221129030904136](C:\Users\YZY\AppData\Roaming\Typora\typora-user-images\image-20221129030904136.png)
+User finally see the results
+![1](image/resultpage)
+
 
 ### 3.4 Search work correctly
 
@@ -679,3 +675,156 @@ GET /computerphile/_search
 
 ```
 ## 5. Evaluation and Comparison
+
+### 5.1 Run different queries and make relevant judgments for the top 10 hits
+
+*We create a table for each query, each table contains information about the search results of different systems. 1 means the search results are relevant, 0 means the search results are not relevant*
+
+**Search query: Information search**
+
+| Rank | system1 | system2 | system3 |
+| ---- | ------- | ------- | ------- |
+| 1    | 0       | 0       | 0       |
+| 2    | 1       | 0       | 0       |
+| 3    | 1       | 0       | 0       |
+| 4    | 0       | 0       | 1       |
+| 5    | 0       | 0       | 0       |
+| 6    | 0       | 0       | 0       |
+| 7    | 0       | 0       | 1       |
+| 8    | 0       | 0       | 0       |
+| 9    | 1       | 1       | 0       |
+| 10   | 0       | 1       | 0       |
+
+**Search query: Python game**
+
+| Rank | system1 | system2 | system3 |
+| ---- | ------- | ------- | ------- |
+| 1    | 1       | 1       | 1       |
+| 2    | 1       | 1       | 1       |
+| 3    | 0       | 0       | 0       |
+| 4    | 1       | 1       | 1       |
+| 5    | 0       | 0       | 0       |
+| 6    | 0       | 0       | 0       |
+| 7    | 0       | 0       | 0       |
+| 8    | 0       | 0       | 0       |
+| 9    | 0       | 0       | 0       |
+| 10   | 0       | 0       | 0       |
+
+**Search query: Web security**
+
+| Rank | system1 | system2 | system3 |
+| ---- | ------- | ------- | ------- |
+| 1    | 1       | 0       | 0       |
+| 2    | 1       | 0       | 0       |
+| 3    | 0       | 1       | 1       |
+| 4    | 1       | 1       | 0       |
+| 5    | 0       | 0       | 1       |
+| 6    | 0       | 1       | 0       |
+| 7    | 1       | 0       | 0       |
+| 8    | 1       | 1       | 0       |
+| 9    | 1       | 1       | 1       |
+| 10   | 1       | 0       | 0       |
+
+**Search query: Machine learing**
+
+| Rank | system1 | system2 | system3 |
+| ---- | ------- | ------- | ------- |
+| 1    | 1       | 1       | 1       |
+| 2    | 1       | 1       | 1       |
+| 3    | 1       | 1       | 1       |
+| 4    | 1       | 0       | 0       |
+| 5    | 0       | 0       | 1       |
+| 6    | 0       | 0       | 1       |
+| 7    | 1       | 1       | 1       |
+| 8    | 0       | 0       | 0       |
+| 9    | 1       | 0       | 0       |
+| 10   | 1       | 1       | 0       |
+
+**Search query: Information**
+
+| Rank | system1 | system2 | system3 |
+| ---- | ------- | ------- | ------- |
+| 1    | 1       | 1       | 1       |
+| 2    | 1       | 1       | 1       |
+| 3    | 0       | 0       | 0       |
+| 4    | 0       | 0       | 0       |
+| 5    | 0       | 0       | 0       |
+| 6    | 0       | 0       | 0       |
+| 7    | 0       | 0       | 0       |
+| 8    | 0       | 0       | 0       |
+| 9    | 0       | 0       | 0       |
+| 10   | 0       | 0       | 0       |
+
+**Search query: Big data**
+
+| Rank | system1 | system2 | system3 |
+| ---- | ------- | ------- | ------- |
+| 1    | 1       | 1       | 1       |
+| 2    | 1       | 1       | 1       |
+| 3    | 1       | 1       | 1       |
+| 4    | 0       | 1       | 1       |
+| 5    | 1       | 0       | 1       |
+| 6    | 0       | 1       | 0       |
+| 7    | 1       | 0       | 0       |
+| 8    | 0       | 0       | 0       |
+| 9    | 0       | 0       | 1       |
+| 10   | 0       | 0       | 0       |
+
+
+
+### 5.2 Compare the results across 3 systems
+
++ **Our queries cover a wide range of channels**
++ **System 1's search yielded the most results**
++ **System 3 tends to search for results that System 1 and System 2 can't**
++ **The performance of system 2 is relatively mediocre, the relevance, breadth and priority of search results are not as good as system 1 and system 2**
++ **However, on some of the more explicit queries, the three systems performed surprisingly well together**
+
+
+
+### 5.3 Calculate MAP for each of the queries on each system
+
+*For the sake of accuracy, automation, we wrote a Python code to calculate MAP*
+
+```python
+def MAP(sequence):
+    '''
+    input: Boolean Sequence
+    output: MAP value
+    '''
+    sum=0
+    result=0
+    count=0
+    for times,item in enumerate(sequence):
+        sum+=item
+        if item==1:
+            count+=1
+            result+=sum/(times+1)
+    print(result/count)
+```
+
+**MAP matrix:**
+
+| Query              | System1       | System2       | System3       |
+| ------------------ | ------------- | ------------- | ------------- |
+| Information search | 0.500         | 0.160         | 0.268         |
+| Python game        | 0.917         | 0.917         | 0.917         |
+| Web security       | 0.759         | 0.478         | 0.356         |
+| Machine learning   | 0.869         | 0.814         | 0.915         |
+| Information        | 1.000         | 1.000         | 1.000         |
+| Big data           | 0.903         | 0.967         | 0.944         |
+|                    | 0.825（mean） | 0.723（mean） | 0.734（mean） |
+
+
+
+### 5.4 Discuss and report the comparison results
+
++ The calculated MAP results are similar to the human-perceived results when we collected the data at the beginning
+  + Among the three systems, system 1 performs the best, followed by system 2, and system 3 performs average
++ However, from the MAP data, we can also see the different characteristics of the three systems
+  + System 1 is characterized by being very stable, with better prediction results in most problems
+  + Systems 2 and 3 are characterized by the fact that in some problems, their search results are much better than the other two systems
++ Combining the MAP calculations and the conclusions of 5.2
+  + System 1 is suitable for most of the searches and can be used as a baseline
+  + System 3 is suitable for use when the other two systems return single results, and it can often search for results that are not searched by the other systems but are very relevant.
+  + Systems 2 and 3, which we have improved, are better at searching for certain hot issues and can be used as a complement to System 1
