@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    
+    <link rel="stylesheet" href="../static/listView.css">
+</head>
+<body>
+
+<div id="mainContentDiv">
+
+    <div class="mainDivMainImgDiv" >
+        <div class="headLeftDiv headLeftDivFont">Search Results</div>
+        <div class="link-top"></div>
+        <div class="headLineBlowDiv">
+            <div class="headLeftDiv">
+                Hit<span>【{{HITS}}】</span>results
+            </div>
+        </div>
+    </div>
+
+    <div class="mainDivMainInfoiv">
+        <div class="mainInfoSubDiv">
+            {% for item in Data %}
+                <div class="mainDIvMainInfoDivSubInfoDiv" >
+                    <div class="mainDivMainInfoiv_HeadTextDiv " >
+                        <div class="mainDivMainInfoiv_HeadTextDiv_TextBox cardInfoTitle findKey" >
+                            {{item['title']}}
+                        </div>
+                    </div>
+                    <div class="mainDivMainInfoiv_mainTextDiv  findKey">
+                        {{item['introduction']}}
+                    </div>
+                    <div class="InfoDiv_Right_2 rightFlexFont">
+                        {{item['date']}}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</body>
+</html>
