@@ -19,7 +19,7 @@ The final appearance of the web page presented to the user is controlled by the 
 
 - 余正阳: 前端编程，Flask后端编程，评估系统性能
 - 胡纪甚: 数据录入，web后端编程
-- Chuanshi Wang: data collection, data cleaning、writing ElasticSearch queries
+- Chuanshi Wang: data collection, data cleaning， writing ElasticSearch queries
 
 ## 2. Data Collection
 
