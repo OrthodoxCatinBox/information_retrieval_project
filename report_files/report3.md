@@ -291,7 +291,7 @@ The running process is as follows. First we need to start search.py (as explaine
 search.html will use style.css
 
 ```css
-/*此代码为style.css*/
+/*This is style.css*/
 body {
     width: 100%;
     height: 100vh;
