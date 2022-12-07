@@ -351,7 +351,7 @@ body {
 }
 ```
 
-![image-20221207211218382](image/homepage)
+![homepage.png](image/homepage.png)
 
 When the user enters content and clicks search, search.py will automatically run result.html. In this html file, we embed python loop code that can be recognized by Flask, so that as many results as the backend returns, as many search items will appear on the frontend
 
@@ -558,7 +558,7 @@ body {
 ```
 
 User finally see the results
-![1](image/resultpage)
+![resultpage.png](image/resultpage.png)
 
 
 ### 3.4 Search work correctly
