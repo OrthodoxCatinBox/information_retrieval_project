@@ -17,7 +17,7 @@ Computerphile是视频网站YouTube上的一个介绍计算机科学的频道 (c
 
 ### 1.3 团队分工
 
-- 余正阳: 前端编程，Flask后端编程，评估系统性能，计算MAP
+- Zhengyang Yu: Front-end programming, Flask back-end programming, evaluating system performance, calculating MAP
 - 胡纪甚: 数据录入，web后端编程
 - 王川石: 数据收集、数据清洗、编写ElasticSearch查询
 
