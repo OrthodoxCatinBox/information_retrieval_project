@@ -337,7 +337,7 @@ body {
 }
 ```
 
-![image-20221207211218382](C:\Users\YZY\AppData\Roaming\Typora\typora-user-images\image-20221207211218382.png)
+![image-20221207211218382](image/homepage)
 
 When the user enters content and clicks search, search.py will automatically run result.html. In this html file, we embed python loop code that can be recognized by Flask, so that as many results as the backend returns, as many search items will appear on the frontend
 
@@ -544,7 +544,7 @@ body {
 ```
 
 User finally see the results
-![1](C:\Users\YZY\Desktop\1.png)
+![1](image/resultpage)
 
 ### 3.4 Search work correctly
 
