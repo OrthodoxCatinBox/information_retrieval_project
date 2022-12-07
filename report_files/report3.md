@@ -4,15 +4,15 @@
 
 ### 1.1 Data Source
 
-Computerphile is a channel on the video site YouTube that introduces computer science. In each of its videos, a computer science scholar is invited to explain and analyze some interesting or important issues in the field.
-On the YouTube video play page, the title, upload date, number of views, likes, comments, and a brief description of the video are displayed, which gives us a general idea of the content and quality (popularity) of the video.
+Computerphile is a channel on the video site YouTube that introduces computer science. In each of its videos, a computer science scholar is invited to explain and analyze some interesting or important issues in the field.  
+On the YouTube video play page, the title, upload date, number of views, likes, comments, and a brief description of the video are displayed, which gives us a general idea of the content and quality (popularity) of the video.  
 Therefore, using a Web scraping tool, we can build a data set with the theme "Computerphile's lectures uploaded to YouTube", and after filtering, there are 747 legal data items corresponding to the lectures. Using this data, we will try to help viewers find more lectures they need.
 
 ### 1.2 Project Architecture
 
-The project consists of three main components: the ElasticSearch search engine, the web backend, and the web frontend.
-We build a Web crawler using Scrapy and Selenium to collect needed data from YouTube, and then upload the data to the ElasticSearch search engine and index it.
-When a request from a user reaches the web backend, the web backend embeds the request into a pre-written ElasticSearch query, calls the ElasticSearch Python API to send the query to the ElasticSearch search engine, and processes the results returned by the search engine into a form usable for the web frontend.
+The project consists of three main components: the ElasticSearch search engine, the web backend, and the web frontend.  
+We build a Web crawler using Scrapy and Selenium to collect needed data from YouTube, and then upload the data to the ElasticSearch search engine and index it.  
+When a request from a user reaches the web backend, the web backend embeds the request into a pre-written ElasticSearch query, calls the ElasticSearch Python API to send the query to the ElasticSearch search engine, and processes the results returned by the search engine into a form usable for the web frontend.  
 The final appearance of the web page presented to the user is controlled by the web front-end, and this part needs to be adjusted to include the trade-offs of the content presented in the web page, the style of the web page, and the logic of the web page operations.
 
 ### 1.3 Division of Work
@@ -25,7 +25,7 @@ The final appearance of the web page presented to the user is controlled by the 
 
 ### 2.1 Tools Introduction
 
-We use a Web scraping tool Scrapy to obtain the data needed for the project from the Internet. Since the website we want to crawl, YouTube, uses JavaScript to render pages dynamically, the HTML returned by the website does not contain most of the information presented in the web page. To solve the problem of getting dynamic webpage content, we utilized Selenium.
+We use a Web scraping tool Scrapy to obtain the data needed for the project from the Internet. Since the website we want to crawl, YouTube, uses JavaScript to render pages dynamically, the HTML returned by the website does not contain most of the information presented in the web page. To solve the problem of getting dynamic webpage content, we utilized Selenium.  
 Selenium is an automated testing tool that can be used to drive the browser with Python code to perform clicks, dropdowns, and other actions to trigger some callbacks in the web page to render the desired content; after rendering, the Python program can also get the loaded HTML through Selenium, thus solving the problem of getting content from dynamic web pages. With the help of Selenium to load dynamic pages, Scrapy can handle the content in dynamic pages as if they were static pages.
 
 ### 2.2 Codes and Explanation
@@ -123,7 +123,7 @@ class ComputerphileSpider(scrapy.Spider):
         return result
 ```
 
-`ComputerphileSpider` has two class methods: `start_requests` and `parse`. The `start_requests` is a generator function that, after accessing Computerphile's YouTube homepage, uses Selenium to control the browser to continuously scroll down the page to load all the videos, and then gets the URLs of all Computerphile's contributed videos from the completely loaded page to provide to the Scheduler for subsequent download and processing. `parse` is used to process the response from Downloader Middlewares, which parses the content in the response into `dict` form and returns it, and will be used by Item Pipeline to generate the data we finally collect.
+`ComputerphileSpider` has two class methods: `start_requests` and `parse`. The `start_requests` is a generator function that, after accessing Computerphile's YouTube homepage, uses Selenium to control the browser to continuously scroll down the page to load all the videos, and then gets the URLs of all Computerphile's contributed videos from the completely loaded page to provide to the Scheduler for subsequent download and processing. `parse` is used to process the response from Downloader Middlewares, which parses the content in the response into `dict` form and returns it, and will be used by Item Pipeline to generate the data we finally collect.  
 As mentioned earlier, because of dynamic rendering, the content contained in the response passed to `parse` is loaded with the help of Selenium. In Scrapy, this can be achieved by writing a Downloader Middleware that contains the logic to call Selenium for loading, which means that the following code needs to be added to the file middlewares.py to create the `ComputerphileMiddleware` class, which means adding the following code to the file:
 
 ```python
@@ -171,7 +171,7 @@ class ComputerphileMiddleware:
         return response
 ```
 
-Downloader Middleware receives requests from the Scheduler and gives the corresponding response to the `parse` method of the Spider, which shows that its core logic is precisely the `process_request` method, which uses Selenium to call the browser to access the URL contained in the request, control the browser to render the needed content, and obtain the rendered page HTML, which is wrapped into an `HtmlResponse` object and returned.
+Downloader Middleware receives requests from the Scheduler and gives the corresponding response to the `parse` method of the Spider, which shows that its core logic is precisely the `process_request` method, which uses Selenium to call the browser to access the URL contained in the request, control the browser to render the needed content, and obtain the rendered page HTML, which is wrapped into an `HtmlResponse` object and returned.  
 In order for `ComputerphileMiddleware` to take effect, the following is required in settings.py:
 
 ```python
