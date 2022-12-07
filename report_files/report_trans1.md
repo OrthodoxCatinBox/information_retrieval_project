@@ -186,6 +186,9 @@ Run the following command to crawl all video information of Computerphile, and t
 scrapy crawl computerphile -O computerphile.csv
 ```
 
+And the crawling result would be like:
+![csv_screenshot](images/csv_screenshot.png)
+
 ## 3. Baseline IR System
 
 ### 3.1 Imported data into elasticsearch
