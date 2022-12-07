@@ -1,5 +1,11 @@
 # INFO300 Term Project
 
+## Group Members and Student IDs
+
+- Zhengyang Yu: 320200945951
+- Jishen Hu: 320200930961
+- Chuanshi Wang: 320200945921
+
 ## 1. Introduction
 
 ### 1.1 Data Source
